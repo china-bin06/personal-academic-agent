@@ -12,10 +12,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.db.session import engine
 
 from app.api.chat import router as chat_router
+from app.api.data_management import router as data_router
+from app.api.collection_control import router as collection_router
+from app.api.academic_calendar import router as calendar_router
 
-app = FastAPI(title="个人学业 Agent")
+app = FastAPI(title="个人学业 Agent", version="0.2.0")
 
 app.include_router(chat_router)
+app.include_router(data_router)
+app.include_router(collection_router)
+app.include_router(calendar_router)
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 

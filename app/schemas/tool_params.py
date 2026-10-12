@@ -1,3 +1,6 @@
+from datetime import date
+from typing import Literal
+
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -54,3 +57,15 @@ class ScheduleParams(TermParams):
 
 class DegreeProgressParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class DateScheduleParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    target_date: date | None = None
+    relative_day: Literal["今天", "明天", "后天"] | None = None
+
+    @model_validator(mode="after")
+    def validate_date_choice(self):
+        if (self.target_date is None) == (self.relative_day is None):
+            raise ValueError("请提供具体日期或今天/明天/后天中的一种，不能同时提供")
+        return self

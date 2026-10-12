@@ -6,49 +6,182 @@
   <title>个人学业 Agent</title>
   <link rel="stylesheet" href="/static/styles.css">
   <script src="/static/app.js" defer></script>
+  <script src="/static/navigation.js" defer></script>
+  <script src="/static/management.js" defer></script>
+  <script src="/static/collection.js" defer></script>
+  <script src="/static/calendar.js" defer></script>
 </head>
 <body>
   <main>
-    <header>
+    <header class="page-header">
+      <div class="header-main">
       <h1>个人学业 Agent</h1>
       <p>查询已导入的成绩、课表和培养计划。</p>
       <p id="service-status" role="status">正在检查服务状态……</p>
+      <p class="hint">版本 v0.2.0 · 本地单用户</p>
+      </div>
+      <div class="header-aside">
+        <time id="site-clock" class="site-clock" aria-label="北京时间">正在同步北京时间……</time>
+        <figure class="campus-illustration">
+          <img src="/static/assets/hua-shi-niang.png" alt="华师娘校园插画" width="1536" height="1024">
+          <figcaption>
+            <label for="illustration-size">图片大小</label>
+            <input id="illustration-size" type="range" min="160" max="360" step="10" value="240">
+          </figcaption>
+        </figure>
+      </div>
     </header>
 
-    <section>
-      <h2>提问</h2>
+    <div class="workspace-layout">
+    <aside class="function-list" aria-label="功能列表">
+      <nav>
+        <a id="nav-question" href="#question-panel" aria-current="page">问答首页</a>
+        <a id="nav-import" href="#import-panel">数据导入</a>
+        <a id="nav-data" href="#data-panel">数据时间</a>
+        <a id="nav-calendar" href="#calendar-panel">开学日期同步</a>
+        <a id="nav-plan" href="#plan-panel">培养计划</a>
+        <a id="nav-tasks" href="#tasks-panel">采集任务</a>
+      </nav>
+    </aside>
+    <div class="workspace-content">
+    <section id="question-panel" class="app-view">
+      <h2>学业问答</h2>
       <form id="question-form">
         <label for="question">请输入完整问题</label>
         <textarea id="question" rows="4" maxlength="2000" required
           placeholder="例如：2025-2026学年第1学期最高分和最低分分别是哪门课？"></textarea>
-        <p class="hint">查询课表请明确学年、学期和周次；补充条件后请重新提交完整问题。</p>
+        <p class="hint">可按学年、学期和周次查询课表；同步开学日期后，也可以问“明天有什么课”。</p>
         <button id="submit-button" type="submit">提交问题</button>
       </form>
-      <div id="examples" class="examples">
-        <button type="button">2025-2026学年第1学期的平均分、最高分和最低分是多少？</button>
-        <button type="button">2026-2027学年第1学期第3周星期五有什么课？</button>
-        <button type="button">培养计划各类别还缺多少学分？</button>
-        <button type="button">比较2025-2026学年第1学期和第2学期的平均成绩。</button>
-      </div>
-    </section>
-
-    <section id="result" hidden>
+      <details id="question-examples">
+        <summary>查看示例问题</summary>
+        <div id="examples" class="examples">
+          <button type="button">2025-2026学年第1学期的平均分、最高分和最低分是多少？</button>
+          <button type="button">2026-2027学年第1学期第3周星期五有什么课？</button>
+          <button type="button">培养计划各类别还缺多少学分？</button>
+          <button type="button">比较2025-2026学年第1学期和第2学期的平均成绩。</button>
+          <button type="button">明天有什么课？</button>
+        </div>
+      </details>
+    <div id="result" class="question-result" hidden>
       <h2 id="result-title">回答</h2>
       <div id="answer" aria-live="polite"></div>
       <ul id="warnings"></ul>
       <div id="evidence"></div>
+    </div>
     </section>
 
-    <section>
-      <h2>如何更新数据</h2>
-      <ol>
-        <li>运行对应的采集脚本，必要时在本地浏览器手动登录。</li>
-        <li>采集校验通过后，使用已有解析和预览命令核对文件。</li>
-        <li>确认内容正确，再运行对应导入命令。</li>
-        <li>导入完成后，重新提交问题查询最新数据。</li>
-      </ol>
-      <p class="hint">“采集校验通过”表示原始文件可用；完成正式导入后，问答才能查询到这些数据。</p>
+    <section id="import-panel" class="app-view" hidden>
+      <h2>数据导入</h2>
+      <p>选择手动导入或自动导入，两种方式都先预览，再确认写入数据库。</p>
+      <div id="manual-import-panel" class="import-method" aria-labelledby="manual-import-title">
+      <h3 id="manual-import-title">手动导入</h3>
+      <p class="hint">使用你已导出的成绩Excel、课表文件或培养计划HTML，上传后核对预览。</p>
+      <form id="import-form">
+        <label for="import-type">数据类型</label>
+        <select id="import-type">
+          <option value="grades">成绩 Excel（.xlsx）</option>
+          <option value="schedule">课表（.json / .pdf）</option>
+          <option value="requirements">培养计划 HTML（.html / .htm）</option>
+        </select>
+        <label for="import-file">选择文件（最多10MB）</label>
+        <input id="import-file" type="file" accept=".xlsx" required>
+        <button id="preview-button" type="submit">上传并预览</button>
+      </form>
+      </div>
+      <div id="auto-import-panel" class="import-method" aria-labelledby="auto-import-title">
+      <h3 id="auto-import-title">自动导入</h3>
+      <p class="hint">从教务平台自动采集，可能需要你手动登录。采集完成后提供预览，无需再次上传文件。</p>
+      <form id="collection-form">
+        <label for="collection-type">数据类型</label>
+        <select id="collection-type">
+          <option value="schedule">课表 PDF</option>
+          <option value="grades">成绩 Excel</option>
+          <option value="requirements">培养计划 HTML</option>
+        </select>
+        <div id="collection-term">
+          <label for="collection-year">学年（例如2026-2027）</label>
+          <input id="collection-year" type="text" placeholder="2026-2027" pattern="[0-9]{4}-[0-9]{4}" required>
+          <label for="collection-semester">学期</label>
+          <select id="collection-semester">
+            <option value="1">第1学期</option>
+            <option value="2">第2学期</option>
+            <option value="3">第3学期</option>
+          </select>
+        </div>
+        <button id="collection-start" type="submit">开始自动采集</button>
+        <button id="collection-continue" type="button" hidden>已完成登录，继续采集</button>
+        <button id="collection-cancel" type="button" hidden>取消采集</button>
+        <button id="collection-preview" type="button" hidden>查看本次采集预览</button>
+      </form>
+      <p class="hint">在运行服务的电脑上打开Edge；首次或登录失效时请手动登录，再点击继续采集。一次运行一个任务，最多15分钟。取消需等待当前浏览器操作结束。完成后预览并确认导入。</p>
+      <p id="collection-message" role="status" aria-live="polite"></p>
+      </div>
+      <div id="import-review" aria-labelledby="import-review-title">
+        <h3 id="import-review-title">预览与确认导入</h3>
+        <p class="hint">这里显示手动上传或自动采集得到的预览。预览不会写入学业数据库，有效期30分钟。请核对学期、课程、分数、星期、节次及单双周，再确认导入。</p>
+        <p class="hint">两种方式的课表PDF都需要该学期已确认参考JSON补充课程标识和未排课学分；没有参考时请手动上传完整课表JSON。</p>
+        <p id="import-message" role="status"></p>
+        <div id="import-preview"></div>
+        <button id="confirm-button" type="button" disabled>确认导入数据库</button>
+      </div>
+      <details class="import-help">
+        <summary>如何更新数据</summary>
+        <ol>
+          <li>手动导入上传已有文件；自动导入选择类型及学期并采集，必要时在Edge手动登录。</li>
+          <li>在“预览与确认导入”核对内容。自动采集无需再手动上传。</li>
+          <li>确认导入后，检查结果和数据时间，再返回问答首页查询。</li>
+        </ol>
+      </details>
     </section>
+
+    <section id="data-panel" class="app-view" hidden>
+      <h2>已导入数据与更新时间</h2>
+      <button id="refresh-data" type="button">刷新数据状态</button>
+      <div id="data-status" aria-live="polite"></div>
+    </section>
+
+    <section id="calendar-panel" class="app-view" hidden>
+      <h2>开学日期同步</h2>
+      <p class="hint">日期配置单独保存在本地，重启后仍可使用。当前配置与保存时间在本页显示。</p>
+      <details id="calendar-settings" open>
+        <summary>同步开学日期</summary>
+        <p class="hint">设置当前学期的第一教学周周一，不是报到日。保存后，“今天/明天/后天”按北京时间换算教学周。只更新日期配置，不修改已导入课表。</p>
+        <form id="calendar-form">
+          <label for="calendar-year">当前学年</label>
+          <input id="calendar-year" type="text" placeholder="2026-2027" pattern="[0-9]{4}-[0-9]{4}" required>
+          <label for="calendar-semester">当前学期</label>
+          <select id="calendar-semester">
+            <option value="1">第1学期</option>
+            <option value="2">第2学期</option>
+            <option value="3">第3学期</option>
+          </select>
+          <label for="calendar-monday">第一教学周周一日期</label>
+          <input id="calendar-monday" type="date" required>
+          <label for="calendar-weeks">教学周范围（按学校校历确认）</label>
+          <input id="calendar-weeks" type="number" min="1" max="60" step="1" value="20" required>
+          <button id="calendar-save" type="submit">确认并同步</button>
+        </form>
+        <p id="calendar-message" role="status"></p>
+      </details>
+    </section>
+
+    <section id="plan-panel" class="app-view" hidden>
+      <h2>培养计划树</h2>
+      <button id="refresh-plan" type="button">刷新培养计划</button>
+      <div id="plan-tree" aria-live="polite"></div>
+    </section>
+
+    <section id="tasks-panel" class="app-view" hidden>
+      <h2>本地采集任务状态</h2>
+      <div id="collection-jobs"></div>
+      <button id="refresh-tasks" type="button">刷新任务状态</button>
+      <div id="task-list" aria-live="polite"></div>
+      <p class="hint">下面保留原有采集日志；采集校验通过不等于已导入数据库。</p>
+    </section>
+
+    </div>
+    </div>
   </main>
 </body>
 </html>

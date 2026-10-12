@@ -103,7 +103,20 @@ def test_grade_calculation_and_exclusions(test_engine):
     assert [
         item["course_code"]
         for item in result["lowest_courses"]
-    ] == ["A", "B", "C"]
+    ] == ["A"]
+    assert result["minimum"] == Decimal("0")
+    assert result["maximum"] == Decimal("100")
+    assert [item["course_code"] for item in result["highest_courses"]] == ["D"]
+
+
+def test_all_courses_tied_at_extremes_are_returned(test_engine):
+    with Session(test_engine) as session:
+        with session.begin():
+            for code, score in (("A", 60), ("B", 60), ("C", 100), ("D", 100)):
+                add_grade(session, code, score)
+        result = get_grade_summary(session, GradeSummaryParams(academic_year="2025-2026", semester=2), "local")
+    assert [item["course_code"] for item in result["lowest_courses"]] == ["A", "B"]
+    assert [item["course_code"] for item in result["highest_courses"]] == ["C", "D"]
 
 
 def test_empty_term_returns_none(test_engine):

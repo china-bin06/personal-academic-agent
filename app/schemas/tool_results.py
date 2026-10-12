@@ -2,7 +2,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
-from datetime import datetime
+from datetime import datetime, date
+from typing import Literal
 
 class LowestCourse(BaseModel):
     course_code: str
@@ -55,6 +56,18 @@ class ScheduleResult(BaseModel):
     items: list[ScheduleItem]
     unscheduled_courses: list[str]
     note: str
+
+
+class DateScheduleResult(ScheduleResult):
+    resolution_status: Literal["resolved", "needs_configuration", "out_of_term"]
+    target_date: date
+    timezone: Literal["Asia/Shanghai"] = "Asia/Shanghai"
+    academic_year: str | None = None
+    semester: int | None = None
+    week: int | None = Field(default=None, ge=1, le=60)
+    weekday: int = Field(ge=1, le=7)
+    first_monday: date | None = None
+    calendar_updated_at: datetime | None = None
 
 
 class DegreeProgressNode(BaseModel):

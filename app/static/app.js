@@ -140,6 +140,7 @@ function renderEvidence(item) {
   const names = {
     get_grade_summary: "成绩查询依据", compare_terms: "学期比较依据",
     get_schedule: "课表查询依据", get_degree_progress: "学分进度依据",
+    get_schedule_for_date: "日期课表查询依据",
   };
   addText(card, "h3", names[item.tool] || "查询依据");
   const displayArguments = { ...item.arguments };
@@ -152,7 +153,10 @@ function renderEvidence(item) {
     renderGrade(card, data.first, "第一个学期");
     renderGrade(card, data.second, "第二个学期");
     addText(card, "p", `平均分差值：${data.average_difference ?? "无法计算"}`);
-  } else if (item.tool === "get_schedule") {
+  } else if (item.tool === "get_schedule" || item.tool === "get_schedule_for_date") {
+    if (item.tool === "get_schedule_for_date") {
+      addText(card, "p", `日期：${data.target_date}（北京时间）；${data.academic_year ?? "学期未配置"}第${data.semester ?? "—"}学期；第${data.week ?? "—"}教学周`);
+    }
     const weekdays = ["", "一", "二", "三", "四", "五", "六", "日"];
     const rows = data.items.map((item) => ({
       ...item,
@@ -167,10 +171,7 @@ function renderEvidence(item) {
       addText(card, "p", `时间未明确的课程：${data.unscheduled_courses.join("、")}`);
     }
   } else if (item.tool === "get_degree_progress") {
-    showTable(card, "各类别学分进度", data.nodes, [
-      ["name", "类别"], ["required_credits", "要求学分"],
-      ["earned_credits", "获得学分"], ["credit_shortfall", "缺少学分"],
-    ]);
+    renderRequirementTree(card, flatRequirementTree(data.nodes));
     addText(card, "p", "类别可能存在父子关系，不能把所有行的学分直接相加。");
   }
   if (data.note) addText(card, "p", data.note);

@@ -123,6 +123,12 @@ async def agent_loop(question, owner_id, client, evidence):
                         "回答个人数据问题必须引用成功工具结果"
                     )
 
+                if decision.status == "answered" and any(
+                    item.request_id in referenced and item.tool == "get_schedule_for_date"
+                    and item.data.get("resolution_status") != "resolved" for item in evidence
+                ):
+                    raise ValueError("日期尚未解析为教学周，请请求补充配置")
+
                 return ChatResponse(
                     status=decision.status,
                     answer=decision.answer,

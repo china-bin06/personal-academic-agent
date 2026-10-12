@@ -19,12 +19,14 @@ from app.schemas.tool_params import (
     DegreeProgressParams,
     GradeSummaryParams,
     ScheduleParams,
+    DateScheduleParams,
 )
 from app.schemas.tool_results import (
     CompareTermsResult,
     DegreeProgressResult,
     GradeSummaryResult,
     ScheduleResult,
+    DateScheduleResult,
 )
 
 from app.tools.grades import (
@@ -33,6 +35,7 @@ from app.tools.grades import (
 )
 from app.tools.requirements import get_degree_progress
 from app.tools.schedules import get_schedule
+from app.tools.calendar_schedule import get_schedule_for_date
 
 
 @dataclass(frozen=True)
@@ -63,6 +66,7 @@ TOOLS = {
         DegreeProgressResult,
         get_degree_progress,
     ),
+    "get_schedule_for_date": ToolSpec(DateScheduleParams, DateScheduleResult, get_schedule_for_date),
 }
 
 

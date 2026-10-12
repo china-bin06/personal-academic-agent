@@ -1,0 +1,23 @@
+# Python 环境与缓存
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# 本地配置；保留不含真实凭据的示例
+.env
+.env.*
+!.env.example
+
+# 个人数据、采集日志和登录状态
+/data/
+/logs/
+/playwright/.auth/
+
+# 临时文件和备份
+/tmp/
+*.bak
+
+# 编辑器本地配置
+.vscode/
+.idea/

@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?请在.env中配置POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?请在.env中配置POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在.env中配置POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - academic_db:/var/lib/postgresql/data
+
+volumes:
+  academic_db:
